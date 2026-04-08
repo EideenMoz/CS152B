@@ -1,8 +1,8 @@
 module mux2_1_16bit (
-  output wire [15:0] out;       // 16-bit output line
-  input wire [15:0] a;          // 16-bit input A
-  input wire [15:0] b;          // 16-bit input B
-  input wire sel;               // 1-bit selector for a 2:1 MUX
+  output wire [15:0] out,       // 16-bit output line
+  input wire [15:0] a,          // 16-bit input A
+  input wire [15:0] b,          // 16-bit input B
+  input wire sel               // 1-bit selector for a 2:1 MUX
 );
   genvar i;
   generate
