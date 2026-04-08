@@ -6,7 +6,7 @@ module increment16 (
 );
 
     // increment: in + 0 + 1
-    adder16 ADD_INC (
+    addition16 ADD_INC (
         out,
         cout,
         overflow,
