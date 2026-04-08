@@ -2,9 +2,9 @@ module addition16(
     output [15:0] sum,
     output        cout,
     output        overflow,
-    input  [15:0] a,
-    input  [15:0] b,
-    input         cin
+    input  wire [15:0] a,
+    input  wire [15:0] b,
+    input  wire       cin
 );
     wire [16:0] c;
     assign c[0] = cin;

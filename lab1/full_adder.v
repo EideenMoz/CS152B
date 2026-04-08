@@ -1,9 +1,9 @@
 module full_adder (
     output sum,
     output cout,
-    input  a,
-    input  b,
-    input  cin
+    input  wire a,
+    input  wire b,
+    input  wire cin
 );
     wire axb, w1, w2;
     xor (axb, a, b);

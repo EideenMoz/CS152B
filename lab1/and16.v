@@ -1,7 +1,7 @@
 module and16(
   output [15:0] y,
-  input  [15:0] a,
-  input  [15:0] b
+  input  wire [15:0] a,
+  input  wire [15:0] b
 );
   genvar i;
   generate
