@@ -6,11 +6,11 @@ module mux4_1_16bit (
   wire [15:0] low_two, high_two;
 
   // First stage: Two 2:1 Muxes using lower bit sel[0]
-  mux2_1_16bit(low_two, in0, in1, sel[0]);     // Check LSB of I0 and I1
-  mux2_1_16bit(high_two, in2, in3, sel[0]);    // Check LSB of I2 and I3
+  mux2_1_16bit m0(low_two, in0, in1, sel[0]);     // Check LSB of I0 and I1
+  mux2_1_16bit m1(high_two, in2, in3, sel[0]);    // Check LSB of I2 and I3
 
   // Second stage: One 2:1 Mux using MSB sel[1]
-  mux2_1_16bit(out, low_two, high_two, sel[1]);
+  mux2_1_16bit m2(out, low_two, high_two, sel[1]);
 endmodule
   
   

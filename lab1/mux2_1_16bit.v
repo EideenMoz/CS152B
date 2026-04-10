@@ -7,7 +7,7 @@ module mux2_1_16bit (
   genvar i;
   generate
     for (i=0; i<16; i=i+1) begin : MUX2_1_16
-      mux2_1(out[i], a[i], b[i], sel);      // Out = A if sel is 0 else B
+      mux2_1 m(out[i], a[i], b[i], sel);      // Out = A if sel is 0 else B
     end
   endgenerate
 endmodule
