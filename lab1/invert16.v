@@ -2,7 +2,7 @@ module invert16(
     input wire [15:0] a,
     output wire [15:0] y,
     output overflow
-)
+);
 
     genvar i;
     generate
