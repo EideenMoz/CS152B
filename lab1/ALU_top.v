@@ -33,22 +33,20 @@ module ALU_top(
     wire [15:0] result_inc;
     wire [15:0] overflow_inc;
 
-    addition16 add_inc (
-        .sum(result_inc),
+    increment16 inc (
+        .out(result_inc),
         .overflow(overflow_inc),
-        .a(a),
-        .b(1)
+        .in(a)
     );
 
     //===Decrement===\\
     wire [15:0] result_dec;
     wire [15:0] overflow_dec;
 
-    addition16 add_dec (
-        .sum(result_dec),
+    decrement16 dec (
+        .out(result_dec),
         .overflow(overflow_dec),
-        .a(a),
-        .b(-1)
+        .in(a)
     );
 
     //===Invert===\\
