@@ -9,11 +9,11 @@ module ALU_top(
 );
     //temp for tb to work
     reg [15:0] result_reg;
-    reg inverted_b;
     assign result = result_reg;
     reg subtract;
     initial subtract=0;
-    assign overflow = subtract ? overflow_sub : overflow_sum;
+    reg overflow_reg;
+    assign overflow = overflow_reg;
 
     //===Addition===\\
     wire [15:0] result_sum;
@@ -29,12 +29,52 @@ module ALU_top(
     //===Subtraction===\\
     wire [15:0] result_sub;
     wire [15:0] overflow_sub;
-    addition16 sub (
+    wire [15:0] inverted_b;
+
+    //note invert inverts sign (not bitwise NOT)
+    invert16 inv_sub (
+        .a(b),
+        .y(inverted_b)
+    );
+
+    addition16 add_sub (
         .sum(result_sub),
         .overflow(overflow_sub),
         .a(a),
         .b(inverted_b),
-        .cin(1)
+        .cin(0)
+    );
+
+    //===Increment===\\
+    wire [15:0] result_inc;
+    wire [15:0] overflow_inc;
+    addition16 add_inc (
+        .sum(result_inc),
+        .overflow(overflow_inc),
+        .a(a),
+        .b(1),
+        .cin(0)
+    );
+
+    //===Decrement===\\
+    wire [15:0] result_dec;
+    wire [15:0] overflow_dec;
+    addition16 add_dec (
+        .sum(result_dec),
+        .overflow(overflow_dec),
+        .a(a),
+        .b(-1),
+        .cin(0)
+    );
+
+    //===Invert===\\
+    //Same as multiplying by -1 (not bitwise NOT)
+    wire [15:0] result_inv;
+    wire [15:0] overflow_inv;
+    invert16 inv (
+        .a(a),
+        .y(result_inv),
+        .overflow(overflow_inv)
     );
 
     //===Bitwise AND===\\
@@ -65,15 +105,33 @@ module ALU_top(
         case(ALU_ctrl)
             4'h0: begin 
                 result_reg = result_sub;    //sub
-                subtract=1;
+                overflow_reg = overflow_sub;
             end
-            4'h1: result_reg = result_sum;    //add
-            4'h2: result_reg = result_or; // OR
-            4'h3: result_reg = result_and;  // AND
-            4'h4: result_reg = a ^ b;      // XOR (example)
-            4'h5: result_reg = ~a;         // NOT A
-            4'h6: result_reg = a << 1;     // Shift left
-            4'h7: result_reg = a >> 1;     // Shift right logical
+            4'h1: begin
+                result_reg = result_sum;    //add
+                overflow_reg = overflow_sum;
+            end
+            4'h2: begin
+                result_reg = result_or; // OR
+                overflow_reg = 1'b0;
+            end
+            4'h3: begin
+                result_reg = result_and;  // AND
+                overflow_reg = 1'b0;
+            end
+            4'h4: begin
+                result_reg = result_dec;      // decrement
+                overflow_reg = overflow_dec;
+            end
+            4'h5: begin
+                result_reg = result_inc;         // increment
+                overflow_reg = overflow_inc;
+            end
+            4'h6: begin
+                result_reg = result_inv;     // invert
+                overflow_reg = overflow_inv; 
+            end
+            4'h7: result_reg = a << 1; // Shift left logical
             4'h8: result_reg = $signed(a) >>> 1; // Shift right arithmetic
             4'h9: result_reg = a + 1;      // Increment
             4'hA: result_reg = a - 1;      // Decrement

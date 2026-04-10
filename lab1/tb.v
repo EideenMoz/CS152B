@@ -21,7 +21,10 @@ ALU_top dut (
 initial begin 
     //INT_MAX=32767, INT_MIN =-32,768
 
-    //===TEST addition16===\\
+    //===TEST subtraction===\\
+    opcode=0;
+
+    //===TEST addition===\\
     opcode=1;
 
     //Regular sums
@@ -59,31 +62,52 @@ initial begin
     opcode=2;
 
     // Regular OR
-    a=16'h0000; b=16'h0000; #10;
-    a=16'hFFFF; b=16'h0000; #10;
-    a=16'h0000; b=16'hFFFF; #10;
+    a=16'h0000; b=16'h0000; #10; // all zeros
+    a=16'hFFFF; b=16'h0000; #10; // all ones x all zeros
+    a=16'h0000; b=16'hFFFF; #10; // all ones x all zeros
     a=16'hAAAA; b=16'h5555; #10; // alternating bits
     a=16'h8000; b=16'h0001; #10; // MSB and LSB
 
     // Edge OR cases
-    a=16'hFFFF; b=16'hFFFF; #10;
+    a=16'hFFFF; b=16'hFFFF; #10; // all ones
     a=16'h7FFF; b=16'h8000; #10; // boundary
-    a=16'h0001; b=16'h8000; #10;
+    a=16'h0001; b=16'h8000; #10; // first and last
 
     //===TEST bitwise AND===\\
     opcode=3;
 
     // Regular AND
-    a=16'hFFFF; b=16'h0000; #10;
-    a=16'hFFFF; b=16'hFFFF; #10;
+    a=16'hFFFF; b=16'h0000; #10; //all ones x all zeros
+    a=16'hFFFF; b=16'hFFFF; #10; //all ones
     a=16'hAAAA; b=16'h5555; #10; // alternating bits
     a=16'h8000; b=16'h0001; #10; // MSB and LSB
 
     // Edge AND cases
     a=16'h7FFF; b=16'h8000; #10; // boundary
-    a=16'h0001; b=16'h8000; #10;
-    a=16'h0000; b=16'h0000; #10;
+    a=16'h0001; b=16'h8000; #10; // first and last
+    a=16'h0000; b=16'h0000; #10; // all zeros
 
+    //===TEST decrement===\\
+    opcode=4;
+    a=16'h0000; b=16'hxxxx; #10; // 0 → -1 (0xFFFF), crosses zero boundary
+    a=16'h0001; b=16'hxxxx; #10; // 1 → 0, smallest positive to zero
+    a=16'h8000; b=16'hxxxx; #10; // TMIN → TMIN-1, signed overflow (wraps to TMAX=0x7FFF)
+    a=16'hFFFF; b=16'hxxxx; #10; // -1 → -2, typical negative value
+
+    //===TEST increment===\\
+    opcode=5;
+    a=16'hFFFF; b=16'hxxxx; #10; // -1 → 0, crosses zero boundary
+    a=16'h0000; b=16'hxxxx; #10; // 0 → 1, zero to smallest positive
+    a=16'h7FFF; b=16'hxxxx; #10; // TMAX → TMAX+1, signed overflow (wraps to TMIN=0x8000)
+    a=16'h8000; b=16'hxxxx; #10; // TMIN → TMIN+1, most negative value incremented
+
+    //===TEST invert (two's complement negation)===\\
+    opcode=6;
+    a=16'h0001; b=16'hxxxx; #10; // 1 → -1 (0xFFFF)
+    a=16'hFFFF; b=16'hxxxx; #10; // -1 → 1
+    a=16'h0000; b=16'hxxxx; #10; // 0 → 0, negation of zero is zero
+    a=16'h8000; b=16'hxxxx; #10; // TMIN → TMIN, only value that overflows (no positive counterpart)
+    a=16'h7FFF; b=16'hxxxx; #10; // TMAX → -TMAX (0x8001)
 
     $finish;
 end
