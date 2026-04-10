@@ -1,3 +1,4 @@
+// implements logical function y = (as') + (bs): y<--a if s==0  else y<--b
 module mux2_1 (
     output wire y,
     input wire a,
