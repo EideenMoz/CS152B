@@ -9,5 +9,5 @@ module invert16(
         for(i = 0; i < 15; i = i + 1) begin : invert
             not (y[i], a[i]);
         end
-    end generate
+    endgenerate
 endmodule
