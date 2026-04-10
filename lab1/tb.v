@@ -24,6 +24,40 @@ initial begin
     //===TEST subtraction===\\
     opcode=0;
 
+    // Regular differences
+    a=16'h0000; b=16'h0000; #10; // 0 - 0 = 0
+    a=16'h0001; b=16'h0000; #10; // 1 - 0 = 1
+    a=16'h0000; b=16'h0001; #10; // 0 - 1 = -1
+    a=16'h0001; b=16'h0001; #10; // 1 - 1 = 0
+    a=5;        b=3;        #10; // 5 - 3 = 2
+    a=30;       b=25;       #10; // 30 - 25 = 5
+    a=15000;    b=10111;    #10; // large positive result
+
+    // Overflow (positive - negative)
+    a=32767;    b=-1;       #10; // TMAX - (-1), overflows to TMIN
+    a=30000;    b=-30000;   #10; // large positive overflow
+    a=32767;    b=-32768;   #10; // TMAX - TMIN, most extreme overflow
+
+    // Negative small tests
+    a=-1;       b=-1;       #10; // -1 - (-1) = 0
+    a=-5;       b=3;        #10; // -5 - 3 = -8
+    a=-15000;   b=10111;    #10; // large negative result
+
+    // Overflow (negative - positive)
+    a=-32768;   b=1;        #10; // TMIN - 1, underflows to TMAX
+    a=-20000;   b=20000;    #10; // large negative overflow
+    a=-32768;   b=32767;    #10; // TMIN - TMAX, most extreme underflow
+
+    // Carry vs overflow
+    a=16'hFFFF; b=16'hFFFF; #10; // -1 - (-1) = 0, carry but no overflow
+    a=16'hFFFF; b=1;        #10; // -1 - 1 = -2, no overflow
+
+    // Boundary: results landing exactly on TMIN/TMAX
+    a=32767;    b=0;        #10; // TMAX - 0 = TMAX
+    a=-32768;   b=0;        #10; // TMIN - 0 = TMIN
+    a=0;        b=-32768;   #10; // 0 - TMIN overflows (no positive counterpart)
+    a=32767;    b=32767;    #10; // TMAX - TMAX = 0
+
     //===TEST addition===\\
     opcode=1;
 

@@ -1,13 +1,11 @@
 module addition16(
     output [15:0] sum,
-    output        cout,
     output        overflow,
     input  wire [15:0] a,
-    input  wire [15:0] b,
-    input  wire       cin
+    input  wire [15:0] b
 );
     wire [16:0] c;
-    assign c[0] = cin;
+    assign c[0] = 0;
 
     genvar i;
     generate

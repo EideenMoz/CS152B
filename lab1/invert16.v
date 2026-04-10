@@ -18,8 +18,7 @@ module invert16(
         .sum(y),
         .overflow(overflow),
         .a(flipped),
-        .b(16'h0001),
-        .cin(0)
+        .b(16'h0001)
     );
     
     // //overflow is really weird in this case: only TMIN.

@@ -1,39 +1,22 @@
 module subtract16 (
     output [15:0] out,
-    output        cout,
     output        overflow,
-    input  [15:0] A,
-    input  [15:0] B
+    input  [15:0] a,
+    input  [15:0] b
 );
 
-    wire [15:0] B_inverted;
-    wire [15:0] B_twos;
-    wire        inc_cout;
-    wire        inc_overflow;
+    wire [15:0] inverted_b;
 
-    // Step 1: invert B
-    invert16 INV_B (
-        B,
-        B_inverted,
-        overlow
+    //note invert inverts sign (not bitwise NOT)
+    invert16 inv_sub (
+        .a(b),
+        .y(inverted_b)
     );
 
-    // Step 2: add 1 to make two's complement
-    increment16 INC_B (
-        B_twos,
-        inc_cout,
-        inc_overflow,
-        B_inverted
+    addition16 add_sub (
+        .sum(out),
+        .overflow(overflow),
+        .a(a),
+        .b(inverted_b)
     );
-
-    // Step 3: add A + two's complement of B
-    adder16 ADD_SUB (
-        out,
-        cout,
-        overflow,
-        A,
-        B_twos,
-        1'b0
-    );
-
 endmodule

@@ -10,59 +10,52 @@ module ALU_top(
     //===Addition===\\
     wire [15:0] result_sum;
     wire [15:0] overflow_sum;
+
     addition16 add (
         .sum(result_sum),
         .overflow(overflow_sum),
         .a(a),
-        .b(b),
-        .cin(0)
+        .b(b)
     );
 
     //===Subtraction===\\
     wire [15:0] result_sub;
     wire [15:0] overflow_sub;
-    wire [15:0] inverted_b;
 
-    //note invert inverts sign (not bitwise NOT)
-    invert16 inv_sub (
-        .a(b),
-        .y(inverted_b)
-    );
-
-    addition16 add_sub (
-        .sum(result_sub),
+    subtract16 sub (
+        .out(result_sub),
         .overflow(overflow_sub),
         .a(a),
-        .b(inverted_b),
-        .cin(0)
+        .b(b)
     );
 
     //===Increment===\\
     wire [15:0] result_inc;
     wire [15:0] overflow_inc;
+
     addition16 add_inc (
         .sum(result_inc),
         .overflow(overflow_inc),
         .a(a),
-        .b(1),
-        .cin(0)
+        .b(1)
     );
 
     //===Decrement===\\
     wire [15:0] result_dec;
     wire [15:0] overflow_dec;
+
     addition16 add_dec (
         .sum(result_dec),
         .overflow(overflow_dec),
         .a(a),
-        .b(-1),
-        .cin(0)
+        .b(-1)
     );
 
     //===Invert===\\
     //Same as multiplying by -1 (not bitwise NOT)
     wire [15:0] result_inv;
     wire [15:0] overflow_inv;
+
     invert16 inv (
         .a(a),
         .y(result_inv),
@@ -71,6 +64,7 @@ module ALU_top(
 
     //===Bitwise AND===\\
     wire [15:0] result_and;
+
     and16 bit_and(
         .y(result_and),
         .a(a),
@@ -79,6 +73,7 @@ module ALU_top(
 
     //===Bitwise OR===\\
     wire [15:0] result_or;
+
     or16 bit_or(
         .y(result_or),
         .a(a),
