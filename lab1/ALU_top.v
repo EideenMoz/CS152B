@@ -85,7 +85,7 @@ module ALU_top(
     );
 
     //===Shifts===\\
-    wore [15:0] result_shift;
+    wire [15:0] result_shift;
     wire overflow_shift;
     alu_shifter_unit shifter (
         .out(result_shift),
