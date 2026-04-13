@@ -84,6 +84,17 @@ module ALU_top(
         .zero(zero)
     );
 
+    //===Shifts===\\
+    wore [15:0] result_shift;
+    wire overflow_shift;
+    alu_shifter_unit shifter (
+        .out(result_shift),
+        .overflow(overflow_shift),
+        .a(a),
+        .b(b),
+        .opcode(ALU_ctrl) // Use lower 2 bits of ALU_ctrl for shift type
+    );
+
     //===Set less than equal===\\
     wire [15:0] result_sle;
     set_less_than_equal sle (
@@ -103,13 +114,13 @@ module ALU_top(
         .in5(result_inc),  
         .in6(result_inv),
         .in7(0),      
-        .in8(0), 
+        .in8(result_shift), 
         .in9(result_sle),       
-        .in10(0),      
+        .in10(result_shift),      
         .in11(0), 
-        .in12(0),   
+        .in12(result_shift),   
         .in13(0),  
-        .in14(0), 
+        .in14(result_shift), 
         .in15(0),  
         .sel(ALU_ctrl)
     );
