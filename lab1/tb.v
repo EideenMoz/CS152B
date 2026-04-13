@@ -145,9 +145,71 @@ initial begin
 
     //===TEST set less than equal===\\
     opcode=9;
-    a=1; b=1; #10; // 1 ≤ 1, should output 1
-    a=0; b=1; #10; // 0 ≤ 1, should output 1
-    a=1; b=0; #10; // 1 ≤ 0, should output 0
+    a=1;        b=1;        #10; // 1 ≤ 1, should output 1
+    a=0;        b=1;        #10; // 0 ≤ 1, should output 1
+    a=1;        b=0;        #10; // 1 ≤ 0, should output 0
+    a=0;        b=0;        #10; // 0 ≤ 0, should output 1
+    a=-1;       b=0;        #10; // -1 ≤ 0, should output 1
+    a=0;        b=-1;       #10; // 0 ≤ -1, should output 0
+    a=-1;       b=-1;       #10; // -1 ≤ -1, should output 1
+    a=-32768;   b=32767;    #10; // TMIN ≤ TMAX, should output 1
+    a=32767;    b=-32768;   #10; // TMAX ≤ TMIN, should output 0
+    a=-32768;   b=-32768;   #10; // TMIN ≤ TMIN, should output 1
+    a=32767;    b=32767;    #10; // TMAX ≤ TMAX, should output 1
+    a=-32768;   b=0;        #10; // TMIN ≤ 0, different signs, should output 1
+    a=0;        b=-32768;   #10; // 0 ≤ TMIN, different signs, should output 0
+
+    //===TEST arithmetic left shift===\\
+    opcode=12;
+    a=16'h0001; b=0;        #10; // 1 << 0 = 1, no shift
+    a=16'h0001; b=1;        #10; // 1 << 1 = 2
+    a=16'h0001; b=14;       #10; // 1 << 14 = 0x4000, still positive
+    a=16'h0001; b=15;       #10; // 1 << 15 = 0x8000, overflows into sign bit
+    a=16'h0001; b=16;       #10; // shift >= 16, result = 0
+    a=16'h7FFF; b=1;        #10; // TMAX << 1, overflows into sign bit
+    a=16'h8000; b=1;        #10; // TMIN << 1, MSB shifted out, result = 0
+    a=16'hFFFF; b=1;        #10; // -1 << 1 = -2 (0xFFFE)
+    a=16'hFFFF; b=15;       #10; // -1 << 15 = 0x8000 (TMIN)
+    a=16'h0000; b=15;       #10; // 0 << anything = 0
+
+    //===TEST arithmetic right shift===\\
+    opcode=14;
+    a=16'h0001; b=0;        #10; // 1 >> 0 = 1, no shift
+    a=16'h0001; b=1;        #10; // 1 >> 1 = 0, shift out only bit
+    a=16'h7FFF; b=1;        #10; // TMAX >> 1 = 0x3FFF, sign preserved (0)
+    a=16'h7FFF; b=15;       #10; // TMAX >> 15 = 0, all bits shifted out
+    a=16'h8000; b=1;        #10; // TMIN >> 1 = 0xC000, sign bit replicated
+    a=16'h8000; b=15;       #10; // TMIN >> 15 = 0xFFFF (-1), all sign bits
+    a=16'hFFFF; b=1;        #10; // -1 >> 1 = -1 (0xFFFF), sign preserved
+    a=16'hFFFF; b=15;       #10; // -1 >> 15 = -1 (0xFFFF), sign preserved
+    a=16'hFFFF; b=16;       #10; // shift >= 16, result = 0xFFFF (-1), all sign
+    a=16'h0000; b=15;       #10; // 0 >> anything = 0
+
+    //===TEST logical left shift===\\
+    opcode=8;
+    a=16'h0001; b=0;        #10; // 1 << 0 = 1, no shift
+    a=16'h0001; b=1;        #10; // 1 << 1 = 2
+    a=16'h0001; b=15;       #10; // 1 << 15 = 0x8000, shifted into MSB
+    a=16'h0001; b=16;       #10; // shift >= 16, result = 0
+    a=16'hFFFF; b=1;        #10; // 0xFFFF << 1 = 0xFFFE, LSB zeroed
+    a=16'hFFFF; b=15;       #10; // 0xFFFF << 15 = 0x8000, only MSB remains
+    a=16'hFFFF; b=16;       #10; // shift >= 16, result = 0
+    a=16'h8000; b=1;        #10; // MSB shifted out, result = 0
+    a=16'h0000; b=15;       #10; // 0 << anything = 0
+
+    //===TEST logical right shift===\\
+    opcode=10;
+    a=16'h0001; b=0;        #10; // 1 >> 0 = 1, no shift
+    a=16'h0001; b=1;        #10; // 1 >> 1 = 0, bit shifted out
+    a=16'h8000; b=1;        #10; // 0x8000 >> 1 = 0x4000, MSB zeroed (unlike arithmetic)
+    a=16'h8000; b=15;       #10; // 0x8000 >> 15 = 0x0001
+    a=16'h8000; b=16;       #10; // shift >= 16, result = 0
+    a=16'hFFFF; b=1;        #10; // 0xFFFF >> 1 = 0x7FFF, MSB zeroed
+    a=16'hFFFF; b=15;       #10; // 0xFFFF >> 15 = 0x0001
+    a=16'hFFFF; b=16;       #10; // shift >= 16, result = 0
+    a=16'h0000; b=15;       #10; // 0 >> anything = 0
+
     $finish;
+
 end
 endmodule
