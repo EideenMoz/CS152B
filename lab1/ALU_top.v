@@ -92,7 +92,7 @@ module ALU_top(
         .overflow(overflow_shift),
         .a(a),
         .b(b),
-        .opcode(ALU_ctrl) // Use lower 2 bits of ALU_ctrl for shift type
+        .opcode(ALU_ctrl) 
     );
 
     //===Set less than equal===\\

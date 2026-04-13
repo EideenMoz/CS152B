@@ -5,6 +5,7 @@ module alu_shifter_unit(
   input wire [15:0] b,         // b[3:0] is shift amount (check if any bits in b[15:4] are set)
   input wire [3:0] opcode     // 1100: ASL, 1110: ASR, 1000: LSL, 1010: LSR
 );
+
   wire is_right, is_arith, fill_bit;
   wire [15:0] prepared_in, shifted_raw;
 

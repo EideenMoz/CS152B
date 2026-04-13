@@ -14,6 +14,6 @@ module barrel_core_16 (
   // Stage 2: Shift 4
   mux2_1_16bit st2 (s2, s1, {{4{fill}}, s1[15:4]}, amt[2]);
   // Stage 3: Shift 8
-  mux2_1_16bit st3 (out, s2, {{8{fill}}, st2[15:8]}, amt[4]);
+  mux2_1_16bit st3 (out, s2, {{8{fill}}, s2[15:8]}, amt[3]);
 endmodule
   
