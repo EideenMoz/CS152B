@@ -143,6 +143,11 @@ initial begin
     a=16'h8000; b=16'hxxxx; #10; // TMIN → TMIN, only value that overflows (no positive counterpart)
     a=16'h7FFF; b=16'hxxxx; #10; // TMAX → -TMAX (0x8001)
 
+    //===TEST set less than equal===\\
+    opcode=9;
+    a=1; b=1; #10; // 1 ≤ 1, should output 1
+    a=0; b=1; #10; // 0 ≤ 1, should output 1
+    a=1; b=0; #10; // 1 ≤ 0, should output 0
     $finish;
 end
 endmodule

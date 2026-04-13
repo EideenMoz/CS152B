@@ -84,6 +84,15 @@ module ALU_top(
         .zero(zero)
     );
 
+    //===Set less than equal===\\
+    wire [15:0] result_sle;
+    set_less_than_equal sle (
+        .a(a),
+        .b(b),
+        .out(result_sle)
+    );
+
+    //===Result and overflow muxes===\\
     mux16_1_16bit mux (
         .out(result),
         .in0(result_sub),
@@ -95,7 +104,7 @@ module ALU_top(
         .in6(result_inv),
         .in7(0),      
         .in8(0), 
-        .in9(0),       
+        .in9(result_sle),       
         .in10(0),      
         .in11(0), 
         .in12(0),   
@@ -124,48 +133,5 @@ module ALU_top(
         .in15(0),  
         .sel(ALU_ctrl)
     );
-    // always @(*) begin
-    //     // Default values
-
-    //     case(ALU_ctrl)
-    //         4'h0: begin 
-    //             result_reg = result_sub;    //sub
-    //             overflow_reg = overflow_sub;
-    //         end
-    //         4'h1: begin
-    //             result_reg = result_sum;    //add
-    //             overflow_reg = overflow_sum;
-    //         end
-    //         4'h2: begin
-    //             result_reg = result_or; // OR
-    //             overflow_reg = 1'b0;
-    //         end
-    //         4'h3: begin
-    //             result_reg = result_and;  // AND
-    //             overflow_reg = 1'b0;
-    //         end
-    //         4'h4: begin
-    //             result_reg = result_dec;      // decrement
-    //             overflow_reg = overflow_dec;
-    //         end
-    //         4'h5: begin
-    //             result_reg = result_inc;         // increment
-    //             overflow_reg = overflow_inc;
-    //         end
-    //         4'h6: begin
-    //             result_reg = result_inv;     // invert
-    //             overflow_reg = overflow_inv; 
-    //         end
-    //         4'h7: result_reg = a << 1; // Shift left logical
-    //         4'h8: result_reg = $signed(a) >>> 1; // Shift right arithmetic
-    //         4'h9: result_reg = a + 1;      // Increment
-    //         4'hA: result_reg = a - 1;      // Decrement
-    //         4'hB: result_reg = {a[7:0], b[7:0]}; // Example concatenation
-    //         4'hC: result_reg = a & ~b;     // AND-NOT
-    //         4'hD: result_reg = a | ~b;     // OR-NOT
-    //         4'hE: result_reg = ~(a | b);   // NOR
-    //         4'hF: result_reg = ~(a & b);   // NAND
-    //         default: result_reg = 16'h0000;
-    //     endcase
-    // end
+    
 endmodule
