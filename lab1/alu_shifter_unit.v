@@ -25,7 +25,17 @@ module alu_shifter_unit(
   // if B > d'15:
   //    shift_amount=16
   // else: shift_amount=B[3:0]
-  barrel_core_16 core (shifted_raw, prepared_in, B[3:0], fill_bit);
+  wire b_gt_15; // Structural OR reduction of B[15:4]
+  or g_or_upper (b_gt_15, B[4], B[5], B[6], B[7], B[8], B[9], B[10], B[11], B[12], B[13], B[14], B[15]);
+  wire [3:0] final_shift_amt;
+  // For each bit of the shift amount:
+  // If b_gt_15 is 1, output is 1 (from 4'b1111).
+  // If b_gt_15 is 0, output is B[i].
+  mux2_1 m0 (final_shift_amt[0], B[0], 1'b1, b_gt_15);
+  mux2_1 m1 (final_shift_amt[1], B[1], 1'b1, b_gt_15);
+  mux2_1 m2 (final_shift_amt[2], B[2], 1'b1, b_gt_15);
+  mux2_1 m3 (final_shift_amt[3], B[3], 1'b1, b_gt_15);
+  barrel_core_16 core (shifted_raw, prepared_in, final_shift_amt, fill_bit);
 
   // Post-shift-reverse (handle case when opcode specifies left shift)
   bit_reverser_16 post_rev (out, shifted_raw, should_reverse);
