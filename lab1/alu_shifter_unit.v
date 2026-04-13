@@ -41,7 +41,9 @@ module alu_shifter_unit(
   // Post-shift-reverse (handle case when opcode specifies left shift)
   bit_reverser_16 post_rev (out, shifted_raw, should_reverse);
 
-  xor(overflow, a[15], out[15]); // Overflow if MSB changes during an arithmetic shift
+  wire arithmetic_overflow;
+  xor(arithmetic_overflow, a[15], out[15]); // Overflow if MSB changes during an arithmetic shift
+  and(overflow, is_arith, arithmetic_overflow); // Only consider overflow for arithmetic shifts
 endmodule
   
 
