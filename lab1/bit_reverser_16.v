@@ -9,7 +9,7 @@ module bit_reverser_16 (
   genvar i;
   generate
     for (i=0; i<16; i=i+1) begin : REV_ARRAY
-      mux2_1 m (out[i], in[1], in[15-i], reverse);    // out[i]<--in[i] if reverse==0 else out[i]=in[15-i]
+      mux2_1 m (out[i], in[i], in[15-i], reverse);    // out[i]<--in[i] if reverse==0 else out[i]=in[15-i]
     end
   endgenerate
 endmodule
