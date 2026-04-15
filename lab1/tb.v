@@ -165,6 +165,11 @@ initial begin
     a=16'h0001; b=14;       #10; // 1 << 14 = 0x4000, still positive
     a=16'h0001; b=15;       #10; // 1 << 15 = 0x8000, overflows into sign bit
     a=16'h0001; b=16;       #10; // shift >= 16, result = 0
+    a=16'h0001; b=17;       #10; // shift >= 16, result = 0
+    a=16'h0001; b=20;       #10; // shift >= 16, result = 0
+    a=16'h0001; b=40;       #10; // shift >= 16, result = 0
+    a=16'h0001; b=100;       #10; // shift >= 16, result = 0
+    a=16'h0001; b=30000;       #10; // shift >= 16, result = 0
     a=16'h7FFF; b=1;        #10; // TMAX << 1, overflows into sign bit
     a=16'h8000; b=1;        #10; // TMIN << 1, MSB shifted out, result = 0
     a=16'hFFFF; b=1;        #10; // -1 << 1 = -2 (0xFFFE)
