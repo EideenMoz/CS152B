@@ -13,8 +13,10 @@ module alu_shifter_unit(
   assign is_arith = opcode[2];    // bit 2: 0=Logic, 1=Arith
   assign is_right = opcode[1];    // bit 1: 0=Left, 1=Right
 
-  // Determine the fill bit (logical:0, arith=a[15])
-  mux2_1 fselect (fill_bit, 1'b0, a[15], is_arith);
+  // Sign extension is ONLY for Arithmetic AND Right shifts (ASR).
+  // ASL, LSL, and LSR all shift in zeros.
+  and g_fill_check (use_sign_extension, is_arith, is_right);
+  mux2_1 fselect (fill_bit, 1'b0, a[15], use_sign_extension);
 
   // Pre-reverse for left shift (so we can use our right shift core logic)
   // We reverse if is_right=0
