@@ -134,14 +134,14 @@ module ALU_top(
         .in5(overflow_inc),  
         .in6(overflow_inv),
         .in7(0),      
-        .in8(0), 
+        .in8(overflow_shift), 
         .in9(0),       
-        .in10(0),      
+        .in10(overflow_shift),      
         .in11(0), 
-        .in12(0),   
+        .in12(overflow_shift),   
         .in13(0),  
-        .in14(0), 
-        .in15(0),  
+        .in14(overflow_shift), 
+        .in15(0),   
         .sel(ALU_ctrl)
     );
     

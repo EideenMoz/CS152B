@@ -2,7 +2,6 @@
 module tb();
 
 wire [15:0] S;
-wire cout;
 wire overflow;
 wire zero;
 reg [15:0] a;
