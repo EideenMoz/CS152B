@@ -10,8 +10,8 @@ module alu_shifter_unit(
   wire [15:0] prepared_in, shifted_raw;
 
   // Decode opcode
-  assign is_arith = opcode[1];    // bit 2: 0=Logic, 1=Arith
-  assign is_right = opcode[2];    // bit 1: 0=Left, 1=Right
+  assign is_arith = opcode[2];    // bit 2: 0=Logic, 1=Arith
+  assign is_right = opcode[1];    // bit 1: 0=Left, 1=Right
 
   // Determine the fill bit (logical:0, arith=a[15])
   mux2_1 fselect (fill_bit, 1'b0, a[15], is_arith);
