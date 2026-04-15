@@ -7,7 +7,7 @@ module alu_shifter_unit(
 );
 
   wire is_right, is_arith, fill_bit, use_sign_extension;
-  wire [15:0] prepared_in, shifted_raw;
+  wire [15:0] prepared_in, shifter_out_raw, all_fill, shifted_saturated;
 
   // Decode opcode
   assign is_arith = opcode[2];    // bit 2: 0=Logic, 1=Arith
