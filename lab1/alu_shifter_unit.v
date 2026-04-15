@@ -42,7 +42,7 @@ module alu_shifter_unit(
   mux2_1_16bit saturation_mux (shifted_saturated, shifter_out_raw, all_fill, b_gt_15);
 
   // Post-shift-reverse (handle case when opcode specifies left shift)
-  bit_reverser_16 post_rev (out, shifted_raw, should_reverse);
+  bit_reverser_16 post_rev (out, shifted_saturated, should_reverse);
 
   wire arithmetic_overflow;
   xor(arithmetic_overflow, a[15], out[15]); // Overflow if MSB changes during an arithmetic shift
