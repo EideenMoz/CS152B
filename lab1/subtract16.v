@@ -11,16 +11,17 @@ module subtract16 (
     //note invert inverts sign (not bitwise NOT)
     invert16 inv_sub (
         .a(b),
+        .overflow(overflow_inv),
         .y(inverted_b)
     );
 
     addition16 add_sub (
         .sum(out),
-        .overflow(overflow),
+        .overflow(overflow_add),
         .a(a),
         .b(inverted_b)
     );
 
     or(overflow, overflow_inv, overflow_add);
-    
+
 endmodule
