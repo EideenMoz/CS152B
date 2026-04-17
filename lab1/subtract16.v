@@ -6,7 +6,6 @@ module subtract16 (
 );
 
     wire [15:0] inverted_b;
-    wire overflow_inv, overflow_add;
 
     //note invert inverts sign (not bitwise NOT)
     invert16 inv_sub (
@@ -20,7 +19,4 @@ module subtract16 (
         .a(a),
         .b(inverted_b)
     );
-
-    or(overflow, overflow_inv, overflow_add);
-    
 endmodule
