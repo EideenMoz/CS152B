@@ -13,8 +13,9 @@ reg state;
 reg next_state;
 reg [3:0] position; 
 
+
 //next state logic
-always (*) begin
+always @(*) begin
     case (state) 
         IDLE: begin
             if (send)
@@ -29,18 +30,18 @@ always (*) begin
                 next_state = SEND_DATA;
         end
     endcase
-
 end
 
 //logic for each state
 always @(posedge clk or posedge rst) begin
     if (rst) begin
+        tx_line <= 1; // Idle state is high
         position <= 0;
     end 
     else begin 
         case (state)
             IDLE: begin
-                if (send)
+                if (next_state == SEND_DATA) //if send=1 (but next_state is combinational so we check that instead)
                     tx_line <= 0; // Start bit
                 else
                     tx_line <= 1; // Idle
@@ -57,7 +58,6 @@ always @(posedge clk or posedge rst) begin
         endcase
     end
 end
-endmodule
 
 //update state
 always @(posedge clk or posedge rst) begin
@@ -66,3 +66,4 @@ always @(posedge clk or posedge rst) begin
     else
         state <= next_state;
 end
+endmodule
