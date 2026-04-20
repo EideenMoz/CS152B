@@ -16,7 +16,10 @@ reg [3:0] position;
 always (*) begin
     case (state) 
         IDLE: begin
-            
+            if (send)
+                next_state = SEND_DATA;
+            else
+                next_state = IDLE;
         end
         SEND_DATA: begin
 
@@ -33,7 +36,10 @@ always @(posedge clk or posedge rst) begin
     else begin 
         case (state)
             IDLE: begin
-                tx_line <= 0; // START bit
+                if (send)
+                    tx_line <= 0; // Start bit
+                else
+                    tx_line <= 1; // Idle
             end
             SEND_DATA: begin
                 ;
