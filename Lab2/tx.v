@@ -5,13 +5,13 @@ module tx (
     input [7:0] data,
     output reg tx_line
 );
-// This should output START (0) - DATA {8 bits} - STOP (1) over tx_line in 10 clock cycles. 
+// This should output START (0) - DATA {8 bits} - STOP (1) over tx_line in 10 clock cycles after send is set to 1. 
 localparam IDLE = 0;
 localparam SEND_DATA = 1;
 
 reg state;
 reg next_state;
-reg [3:0] position;
+reg [3:0] position; 
 
 //next state logic
 always (*) begin
@@ -23,7 +23,10 @@ always (*) begin
                 next_state = IDLE;
         end
         SEND_DATA: begin
-
+            if (position == 8)
+                next_state = IDLE;
+            else
+                next_state = SEND_DATA;
         end
     endcase
 
@@ -43,7 +46,13 @@ always @(posedge clk or posedge rst) begin
                     tx_line <= 1; // Idle
             end
             SEND_DATA: begin
-                ;
+                if (position < 8) begin
+                    tx_line <= data[position];
+                    position <= position + 1;
+                end else begin 
+                    tx_line <= 1; // Stop bit
+                    position <= 0;  
+                end
             end
         endcase
     end
