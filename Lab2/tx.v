@@ -6,8 +6,9 @@ module tx (
     output reg tx_line
 );
 // This should output START (0) - DATA {8 bits} - STOP (1) over tx_line in 10 clock cycles. 
-# define IDLE 0
-# define SEND_DATA 1
+localparam IDLE = 0;
+localparam SEND_DATA = 1;
+
 reg state;
 reg next_state;
 reg [3:0] position;
