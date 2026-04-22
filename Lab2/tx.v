@@ -11,8 +11,10 @@ localparam SEND_DATA = 1;
 
 reg state;
 reg next_state;
-reg [3:0] position; 
+reg [3:0] position;
 
+//store data when we begin sending, so that we don't have to worry about data changing mid-transmission
+reg [7:0] data_buffer;
 
 //next state logic
 always @(*) begin
@@ -41,14 +43,15 @@ always @(posedge clk or posedge rst) begin
     else begin 
         case (state)
             IDLE: begin
-                if (next_state == SEND_DATA) //if send=1 (but next_state is combinational so we check that instead)
+                if (next_state == SEND_DATA) begin //if send=1 (but next_state is combinational so we check that instead)
                     tx_line <= 0; // Start bit
-                else
+                    data_buffer <= data;
+                end else
                     tx_line <= 1; // Idle
             end
             SEND_DATA: begin
                 if (position < 8) begin
-                    tx_line <= data[position];
+                    tx_line <= data_buffer[position];
                     position <= position + 1;
                 end else begin 
                     tx_line <= 1; // Stop bit
