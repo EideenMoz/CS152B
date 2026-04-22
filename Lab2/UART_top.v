@@ -7,6 +7,7 @@ module UART_top(
     output tx_line,
     output reg [7:0] receiver_data
 );
+
 wire done;
 wire temp_receiver_data;
 
