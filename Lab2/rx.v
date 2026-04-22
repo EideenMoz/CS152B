@@ -55,7 +55,6 @@ always @(posedge clk or posedge rst) begin
         state <= next_state;
 
         // default pulse behavior
-        done <= 1'b0;
         error <= 1'b0;
 
         case (state)
@@ -64,6 +63,7 @@ always @(posedge clk or posedge rst) begin
             end
 
             READ_DATA: begin
+                done <=0; 
                 data[position] <= rx_line;   // LSB first
                 if (position < 3'd7)
                     position <= position + 1'b1;
