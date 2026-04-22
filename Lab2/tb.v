@@ -2,15 +2,27 @@ module tb();
     reg clk;
     reg rst;
     reg send;
-    reg [7:0] data;
+    reg [7:0] write_data;
+    wire [7:0] receiver_data;
+    wire done;
+    wire error;
     wire tx_line;
 
     tx transmitter(
         .clk(clk),
         .rst(rst),
         .send(send),
-        .data(data),
+        .data(write_data),
         .tx_line(tx_line)
+    );
+
+    rx receiver(
+        .clk(clk),
+        .rst(rst),
+        .rx_line(tx_line),
+        .data(receiver_data),
+        .done(done),
+        .error(error)
     );
 
     // Clock generation: 10 time units period
@@ -22,7 +34,7 @@ module tb();
         $display("Starting UART TX Testbench");
         rst = 1;
         send = 0;
-        data = 8'h00;
+        write_data = 8'h00;
         #100;
         
         rst = 0;
@@ -30,7 +42,7 @@ module tb();
 
         // --- Test Case 1: Normal Transmission ---
         $display("Time %0t: Test Case 1 - Normal Transmission", $time);
-        data = 8'b10101010; // 0xAA
+        write_data = 8'b10101010; // 0xAA
         send = 1;
         #10;      // Hold send high for 1 clock cycle
         send = 0;
@@ -39,21 +51,21 @@ module tb();
         // ADJUST THIS DELAY based on your baud rate!
         #1000; 
 
-        // --- Test Case 2: Changing data mid-transmission ---
-        $display("Time %0t: Test Case 2 - Changing data mid-transmission", $time);
-        data = 8'b11001100; // 0xCC
+        // --- Test Case 2: Changing write_data mid-transmission ---
+        $display("Time %0t: Test Case 2 - Changing write_data mid-transmission", $time);
+        write_data = 8'b01001100; // 0xCC
         send = 1;
         #10;
         send = 0;
         
         #50; // Wait until we are partially through the transmission
-        $display("Time %0t: Modifying data bus to 0xFF", $time);
-        data = 8'b11111111; // Change to 0xFF. The transmitted data should remain 0xCC.
+        $display("Time %0t: Modifying write_data bus to 0xFF", $time);
+        write_data = 8'b11111111; // Change to 0xFF. The transmitted write_data should remain 0xCC.
         
         #1000; // Wait for transmission to finish
 
         // --- Test Case 3: Reset mid-transmission ---
-        data = 8'b01010101; // 0x55
+        write_data = 8'b01010101; // 0x55
         send = 1;
         #10;
         send = 0;
@@ -65,7 +77,24 @@ module tb();
         
         #200; // Wait to observe recovery and ensure tx_line stays idle
 
+        // --- test case rx failure --- 
+        force tx_line = 0; 
+        
+        // Hold the force for the duration of 1 bit period
+        // Replace '100' with your actual bit period duration
+        #100; 
+        
+        // Release the wire back to the transmitter's control
+        release tx_line;
+        
+        // Wait a bit to observe the rx module's 'error' flag trigger
+        #200;
+        
         $finish; // End simulation
+
+        
+
+
     end
 
 endmodule
