@@ -9,7 +9,7 @@ module UART_top(
 );
 
 wire done;
-wire temp_receiver_data;
+    wire [7:0] temp_receiver_data;
 
 rx receiver (
     .clk(baud_rate_clk),
