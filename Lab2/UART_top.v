@@ -5,7 +5,8 @@ module UART_top(
     input [7:0] write_data,
     input rx_line,
     output tx_line,
-    output reg [7:0] receiver_data
+    output reg [7:0] receiver_data,
+    output error
 );
 
 wire done;
@@ -16,7 +17,8 @@ rx receiver (
     .rst(rst),
     .rx_line(rx_line),
     .data(temp_receiver_data),
-    .done(done)
+    .done(done),
+    .error(error)
 );
 
 tx transmitter (

@@ -39,6 +39,7 @@ always @(posedge clk or posedge rst) begin
     if (rst) begin
         tx_line <= 1; // Idle state is high
         position <= 0;
+        data_buffer <= 0;
     end 
     else begin 
         case (state)
