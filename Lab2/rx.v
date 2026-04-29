@@ -15,7 +15,6 @@ localparam STOP_BIT  = 2;
 
 reg [1:0] state, next_state;
 reg [2:0] position;
-reg [7:0] data_next;
 
 // next-state logic
 always @(*) begin
