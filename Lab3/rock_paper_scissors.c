@@ -38,10 +38,11 @@
 #include "xparameters.h"
 
 #define ROCK 1
-#define SCISSORS 2
-#define PAPER 3
-#define KYPDTURN 4
-#define FPGATURN 5
+#define SCISSORS 3
+#define PAPER 2
+#define KYPDTURN 0
+#define FPGATURN 1
+#define CHECKWINNER 2
 
 void GameInitialize();
 u8 getKey(u8 *key, u8 *last_key);
@@ -51,7 +52,8 @@ void DisableCaches();
 void EnableCaches();
 void DemoSleep(u32 millis);
 void read_byte(char *buf, int max_len);
-int parse_1_to_3(const char *s, int *a);
+int parse_1_to_3(const char *s, u8 *a);
+char* map_number_to_string(u8 number);
 
 PmodKYPD myDevice;
 char buffer[2];
@@ -79,7 +81,7 @@ void GameInitialize() {
 void runGame(){
    int turn=KYPDTURN;
    u8 KYPD_key, KYPD_last_key = 'x';
-   int FPGA_key;
+   u8 FPGA_key;
    while (1){
       if (turn==KYPDTURN){
          if (getKey(&KYPD_key, &KYPD_last_key) == 0){
@@ -87,18 +89,53 @@ void runGame(){
             usleep(1000000);
             continue;
          }
-         xil_printf("Key Pressed: %c\r\n", (char) KYPD_key);
+         KYPD_key=KYPD_key-'0';
+         char* str = map_number_to_string(KYPD_key);
+         xil_printf("KYPD Key Pressed: %s\r\n", str);
          turn++;
       }
       if (turn==FPGATURN){
          read_byte(buffer,2);
          if (parse_1_to_3(buffer, &FPGA_key)==-1){
-            xil_printf("Invalid FPGA key!\r\n");
+            xil_printf("Invalid PC terminal key!\r\n");
             usleep(1000000);
             continue;
          }
-         xil_printf("FPGA Key Pressed: %d\r\n", (int) FPGA_key);
-         turn--;
+         char* str = map_number_to_string(FPGA_key);
+         xil_printf("PC terminal Key Pressed: %s\r\n", str);
+         turn++;
+      }
+      if (turn==CHECKWINNER){
+         if (FPGA_key==KYPD_key){
+            xil_printf("Draw!\r\n");
+            turn=KYPDTURN;
+            continue;
+         }
+         switch (FPGA_key)
+         {
+         case ROCK:
+            if (KYPD_key==SCISSORS)
+               xil_printf("PC terminal Wins!\r\n");
+            else
+               xil_printf("KYPD Wins!\r\n");
+         break;
+         case SCISSORS:
+            if (KYPD_key==PAPER)
+               xil_printf("PC terminal Wins!\r\n");
+            else
+               xil_printf("KYPD Wins!\r\n");
+         break;
+         case PAPER:
+            if (KYPD_key==ROCK)
+               xil_printf("PC terminal Wins!\r\n");
+            else
+               xil_printf("KYPD Wins!\r\n");
+         break;
+         default:
+         xil_printf("Something is Wrong\r\n");
+            break;
+         }
+         turn=KYPDTURN;
       }
    }
 
@@ -149,11 +186,11 @@ void read_byte(char *buf, int max_len) {
     buf[i] = '\0';
 }
 
-int parse_1_to_3(const char *s, int *a) {
+int parse_1_to_3(const char *s, u8 *a) {
     int i = 0;
 
     *a = 0;
-    if (s[i]>='0' && s[i]<='3'){
+    if (s[i]>='1' && s[i]<='3'){
       *a = s[i]-'0';
       return 0;
    }
@@ -161,6 +198,18 @@ int parse_1_to_3(const char *s, int *a) {
       return -1;
 }
 
+char* map_number_to_string(u8 number){
+   switch(number)
+   {
+      case ROCK:
+         return "ROCK";
+      case SCISSORS:
+         return "SCISSORS";
+      case PAPER:
+         return "PAPER";
+   }
+   return NULL;
+}
 void GameCleanup() {
    DisableCaches();
 }
