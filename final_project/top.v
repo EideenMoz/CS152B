@@ -1,5 +1,6 @@
 module top (
-    input  wire basys3_100MHz_clk,
+    input wire basys3_100MHz_clk,
+    input wire reset,
 
     // PmodMIC (Input) Ports
     input  wire mic_miso,    // Pin 3 on PmodMIC
@@ -15,9 +16,17 @@ module top (
 
 //Clocking Wizard to get our 12.288 MHz clock  --> 12.288 MHz gets us 48KHz sampling frequency (about 2x human hearing frequency)
 wire mclk_12_288;
-clk_wiz_0 clock_divider (
+clk_wiz_0 clock_divider_12_888 (
     .clk_in1(basys3_100MHz_clk),
+    .reset(reset),
     .clk_out1(mclk_12_288)
+);
+
+clk_divider_48k_3_072M clock_divider_48k_3_072M (
+    .mclk(mclk_12_288),
+    .reset(reset),
+    .i2s_sck(i2s_sck),
+    .i2s_lrck(i2s_lrck)
 );
 
 // Connect internal MCLK straight to the physical PmodI2S MCLK pin
