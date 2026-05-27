@@ -32,8 +32,27 @@ clk_divider_48k_3_072M clock_divider_48k_3_072M (
 // Connect internal MCLK straight to the physical PmodI2S MCLK pin
 assign i2s_mclk = mclk_12_288;
 
-// TODO: Instantiate Audio Clock Divider
-// TODO: Instantiate SPI Master (PmodMIC)
-// TODO: Instantiate I2S Transmitter (PmodI2S)
+wire [11:0] audio_sample;
+wire sample_ready;
+pmod_mic_spi mic_interface (
+    .mclk(mclk_12_288),
+    .reset(reset),
+    .i2s_sck(i2s_sck),
+    .i2s_lrck(i2s_lrck),
+    .mic_miso(mic_miso),
+    .mic_ss(mic_ss),
+    .mic_sck(mic_sck),
+    .audio_sample(audio_sample),
+    .sample_ready(sample_ready)
+);
+
+pmod_i2s_tx i2s_transmitter (
+    .mclk(mclk_12_288),
+    .reset(reset),
+    .i2s_sck(i2s_sck),
+    .i2s_lrck(i2s_lrck),
+    .audio_sample(audio_sample),
+    .i2s_sdin(i2s_sdin)
+);
 
 endmodule
