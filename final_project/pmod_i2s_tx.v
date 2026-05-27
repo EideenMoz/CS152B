@@ -41,7 +41,7 @@ module pmod_i2s_tx (
                 // If LRCK just flipped, we are starting a brand new audio channel
                 if (lrck_edge) begin
                     // Load the 12-bit audio sample, pad the remaining 20 bits with zeros
-                    shift_reg <= {audio_sample, 20'd0}; 
+                     shift_reg <= { ~audio_sample[11], audio_sample[10:0], 20'd0 }; 
                     
                     // Output a 0 for this exact cycle to fulfill the I2S "1-clock delay" rule
                     i2s_sdin  <= 1'b0; 

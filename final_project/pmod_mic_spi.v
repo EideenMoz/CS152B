@@ -98,8 +98,9 @@ module pmod_mic_spi (
                         mic_ss       <= 1'b1; // Put ADC back to sleep
                         sck_gate     <= 1'b0; // Close clock gate
                         
-                        // Extract the 12 payload bits (first 4 are leading zeros)
-                        audio_sample <= shift_reg[11:0]; 
+                        // Shift the window up by 1 bit to fix alignment
+                        audio_sample <= {shift_reg[10:0], 1'b0}; 
+                        
                         sample_ready <= 1'b1; // Alert the next module that data is finished
                         state        <= IDLE; // Return to idle state
                     end
