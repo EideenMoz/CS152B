@@ -16,13 +16,13 @@ module pmod_i2s_tx (
     wire sck_falling_edge;
     wire lrck_edge;
 
-    // store the previous state of slower clocks to detect edges
+    // Store the previous state of slower clocks to detect edges
     always @(posedge mclk) begin
         sck_delay  <= i2s_sck;
         lrck_delay <= i2s_lrck;
     end
 
-    // We shift data out on the falling edge of SCK so the DAC can safely read it on the rising edge
+    // We shift data out on falling edge of SCK so the DAC reads it on the rising edge
     assign sck_falling_edge = (sck_delay && !i2s_sck);
     
     // Detect anytime the Left/Right clock changes channels
