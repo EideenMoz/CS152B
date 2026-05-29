@@ -2,84 +2,95 @@
 
 module top (
     input  wire        basys3_100MHz_clk,
-    input  wire        reset,      // BTN L in the XDC below
+    input  wire        reset,       // BTN L
 
     // PmodMIC on JB
-    input  wire        mic_miso,   // JB3
-    output wire        mic_ss,     // JB1, active-low chip select
-    output wire        mic_sck,    // JB4
+    input  wire        mic_miso,    // JB3
+    output wire        mic_ss,      // JB1
+    output wire        mic_sck,     // JB4
 
-    // Basys-3 LEDs
+    // PmodI2S DAC on JA
+    output wire        i2s_mclk,    // JA1
+    output wire        i2s_lrck,    // JA2
+    output wire        i2s_sck,     // JA3
+    output wire        i2s_sdin,    // JA4
+
+    // Debug LEDs
     output wire [15:0] led
 );
 
-    wire [11:0] mic_sample;
-    wire        sample_ready;
+    wire clk_audio;   // 12.288 MHz
+    wire clk_locked;
 
-    pmodmic_reader mic_reader (
-        .clk_100mhz    (basys3_100MHz_clk),
-        .reset         (reset),
-        .mic_miso      (mic_miso),
-        .mic_ss        (mic_ss),
-        .mic_sck       (mic_sck),
-        .sample        (mic_sample),
-        .sample_ready  (sample_ready)
+    // Create this IP in Vivado:
+    // Clocking Wizard name: clk_wiz_0
+    // Input clock: 100 MHz
+    // Output clk_out1: 12.288 MHz
+    clk_wiz_0 audio_clock (
+        .clk_in1  (basys3_100MHz_clk),
+        .reset    (reset),
+        .clk_out1 (clk_audio),
+        .locked   (clk_locked)
     );
 
-    // Convert unsigned 12-bit ADC value to signed magnitude around midscale.
-    // The microphone ADC is nominally centered near 2048.
-    wire signed [12:0] centered_sample = {1'b0, mic_sample} - 13'sd2048;
-    wire [12:0] abs_sample = centered_sample[12] ?
-                              (~centered_sample + 13'd1) :
-                               centered_sample;
+    wire audio_reset = reset | ~clk_locked;
 
-    // Peak detector for visible LED activity.
-    // sample_ready is too fast to see directly, so accumulate peak level
-    // and refresh the LED bar at about 20 Hz.
-    reg [12:0] peak = 13'd0;
-    reg [22:0] refresh_count = 23'd0;
-    reg [14:0] led_bar = 15'd0;
-    reg [25:0] heartbeat = 26'd0;
+    assign i2s_mclk = clk_audio;
 
-    always @(posedge basys3_100MHz_clk or posedge reset) begin
-        if (reset) begin
-            peak          <= 13'd0;
-            refresh_count <= 23'd0;
-            led_bar       <= 15'd0;
-            heartbeat     <= 26'd0;
-        end else begin
-            heartbeat <= heartbeat + 1'b1;
+    i2s_clock_gen clocks (
+        .mclk     (clk_audio),
+        .reset    (audio_reset),
+        .i2s_sck  (i2s_sck),
+        .i2s_lrck (i2s_lrck)
+    );
 
-            if (sample_ready && abs_sample > peak)
-                peak <= abs_sample;
+    wire [11:0] mic_sample;
+    wire        mic_sample_ready;
 
-            if (refresh_count == 23'd4_999_999) begin
-                refresh_count <= 23'd0;
+    pmodmic_reader_12m mic_reader (
+        .mclk         (clk_audio),
+        .reset        (audio_reset),
+        .sample_tick  (i2s_lrck_rising),
+        .mic_miso     (mic_miso),
+        .mic_ss       (mic_ss),
+        .mic_sck      (mic_sck),
+        .sample       (mic_sample),
+        .sample_ready (mic_sample_ready)
+    );
 
-                led_bar[0]  <= (peak > 13'd4);
-                led_bar[1]  <= (peak > 13'd8);
-                led_bar[2]  <= (peak > 13'd16);
-                led_bar[3]  <= (peak > 13'd32);
-                led_bar[4]  <= (peak > 13'd64);
-                led_bar[5]  <= (peak > 13'd96);
-                led_bar[6]  <= (peak > 13'd128);
-                led_bar[7]  <= (peak > 13'd192);
-                led_bar[8]  <= (peak > 13'd256);
-                led_bar[9]  <= (peak > 13'd384);
-                led_bar[10] <= (peak > 13'd512);
-                led_bar[11] <= (peak > 13'd768);
-                led_bar[12] <= (peak > 13'd1024);
-                led_bar[13] <= (peak > 13'd1536);
-                led_bar[14] <= (peak > 13'd2047);
-
-                peak <= 13'd0;
-            end else begin
-                refresh_count <= refresh_count + 1'b1;
-            end
-        end
+    // Detect rising edge of LRCK in the 12.288 MHz domain.
+    // This triggers one MIC sample per 48 kHz audio frame.
+    reg lrck_d = 1'b0;
+    always @(posedge clk_audio) begin
+        if (audio_reset)
+            lrck_d <= 1'b0;
+        else
+            lrck_d <= i2s_lrck;
     end
 
-    assign led[14:0] = led_bar;
-    assign led[15]   = heartbeat[25]; // slow blink proving FPGA is running
+    wire i2s_lrck_rising = i2s_lrck & ~lrck_d;
+
+    // PmodMIC ADC sample is unsigned 12-bit, nominally centered near 2048.
+    // Convert to signed audio centered around zero.
+    wire signed [12:0] mic_centered = {1'b0, mic_sample} - 13'sd2048;
+
+    // Convert signed 13-bit microphone sample to signed 24-bit PCM.
+    // This leaves some headroom and avoids immediate clipping.
+    wire signed [23:0] pcm_sample = {mic_centered, 11'b0};
+
+    pmod_i2s_tx i2s_tx (
+        .mclk       (clk_audio),
+        .reset      (audio_reset),
+        .i2s_sck    (i2s_sck),
+        .i2s_lrck   (i2s_lrck),
+        .pcm_left   (pcm_sample),
+        .pcm_right  (pcm_sample),
+        .i2s_sdin   (i2s_sdin)
+    );
+
+    // LED debug: raw ADC value on lower 12 LEDs.
+    assign led[11:0] = mic_sample;
+    assign led[14:12] = 3'b000;
+    assign led[15] = clk_locked;
 
 endmodule
