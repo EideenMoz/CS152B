@@ -5,6 +5,17 @@ create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports bas
 ## Reset button: BTN L
 set_property -dict { PACKAGE_PIN W19 IOSTANDARD LVCMOS33 } [get_ports reset]
 
+## PmodI2S DAC on JA
+set_property -dict { PACKAGE_PIN J1 IOSTANDARD LVCMOS33 } [get_ports i2s_mclk]
+set_property -dict { PACKAGE_PIN L2 IOSTANDARD LVCMOS33 } [get_ports i2s_lrck]
+set_property -dict { PACKAGE_PIN J2 IOSTANDARD LVCMOS33 } [get_ports i2s_sck]
+set_property -dict { PACKAGE_PIN G2 IOSTANDARD LVCMOS33 } [get_ports i2s_sdin]
+
+## PmodMIC on JB
+set_property -dict { PACKAGE_PIN A14 IOSTANDARD LVCMOS33 } [get_ports mic_ss]
+set_property -dict { PACKAGE_PIN B15 IOSTANDARD LVCMOS33 } [get_ports mic_miso]
+set_property -dict { PACKAGE_PIN B16 IOSTANDARD LVCMOS33 } [get_ports mic_sck]
+
 ## LEDs
 set_property -dict { PACKAGE_PIN U16 IOSTANDARD LVCMOS33 } [get_ports {led[0]}]
 set_property -dict { PACKAGE_PIN E19 IOSTANDARD LVCMOS33 } [get_ports {led[1]}]
@@ -23,17 +34,5 @@ set_property -dict { PACKAGE_PIN N3  IOSTANDARD LVCMOS33 } [get_ports {led[13]}]
 set_property -dict { PACKAGE_PIN P1  IOSTANDARD LVCMOS33 } [get_ports {led[14]}]
 set_property -dict { PACKAGE_PIN L1  IOSTANDARD LVCMOS33 } [get_ports {led[15]}]
 
-## PmodMIC on JB
-## PmodMIC pin 1: CS
-## PmodMIC pin 2: NC
-## PmodMIC pin 3: MISO
-## PmodMIC pin 4: SCK
-## PmodMIC pin 5: GND
-## PmodMIC pin 6: VCC
-set_property -dict { PACKAGE_PIN A14 IOSTANDARD LVCMOS33 } [get_ports mic_ss]
-set_property -dict { PACKAGE_PIN B15 IOSTANDARD LVCMOS33 } [get_ports mic_miso]
-set_property -dict { PACKAGE_PIN B16 IOSTANDARD LVCMOS33 } [get_ports mic_sck]
-
-## Configuration
 set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property CFGBVS VCCO [current_design]
