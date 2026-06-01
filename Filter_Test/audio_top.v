@@ -3,7 +3,7 @@
 module audio_top(
     input clk,
     input btn,           // start button
-    input [1:0] sw,      // 2-bit switch for gain control
+    input [2:0] sw,      // sw[1:0] = gain control, sw[2] = FIR enable/bypass
 
     // Pmod I2S pins mapped in the XDC file
     output mclk,
@@ -73,12 +73,19 @@ fir_lowpass_simple lowpass_filter (
     .output_sample(filtered_audio)
 );
 
-// 5. Digital Gain Module
+// 5. Filter Bypass Selection and Digital Gain Module
+// sw[2] selects the audio path:
+//   0 = bypass FIR / unfiltered audio
+//   1 = FIR low-pass filtered audio
+//
+// sw[1:0] still controls gain inside audio_gain:
+//   00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x
+wire signed [15:0] selected_audio = sw[2] ? filtered_audio : sample_to_filter;
 wire signed [15:0] gained_audio;
 
 audio_gain volume_control (
-    .sw(sw),
-    .audio_in(filtered_audio),
+    .sw(sw[1:0]),
+    .audio_in(selected_audio),
     .audio_out(gained_audio)
 );
 
