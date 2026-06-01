@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-
 // ============================================================
 // Module: fir_lowpass_simple
 //
@@ -95,39 +94,8 @@ module fir_lowpass_simple (
         input [4:0] tap_index;
         begin
             case (tap_index)
-                5'd0:  coefficient = 16'sd55;
-                5'd1:  coefficient = 16'sd58;
-                5'd2:  coefficient = 16'sd48;
-                5'd3:  coefficient = 16'sd0;
-                5'd4:  coefficient = -16'sd110;
-                5'd5:  coefficient = -16'sd279;
-                5'd6:  coefficient = -16'sd460;
-                5'd7:  coefficient = -16'sd554;
-                5'd8:  coefficient = -16'sd437;
-                5'd9:  coefficient = 16'sd0;
-                5'd10: coefficient = 16'sd801;
-                5'd11: coefficient = 16'sd1908;
-                5'd12: coefficient = 16'sd3161;
-                5'd13: coefficient = 16'sd4323;
-                5'd14: coefficient = 16'sd5146;
-                5'd15: coefficient = 16'sd5444;
-                5'd16: coefficient = 16'sd5146;
-                5'd17: coefficient = 16'sd4323;
-                5'd18: coefficient = 16'sd3161;
-                5'd19: coefficient = 16'sd1908;
-                5'd20: coefficient = 16'sd801;
-                5'd21: coefficient = 16'sd0;
-                5'd22: coefficient = -16'sd437;
-                5'd23: coefficient = -16'sd554;
-                5'd24: coefficient = -16'sd460;
-                5'd25: coefficient = -16'sd279;
-                5'd26: coefficient = -16'sd110;
-                5'd27: coefficient = 16'sd0;
-                5'd28: coefficient = 16'sd48;
-                5'd29: coefficient = 16'sd58;
-                5'd30: coefficient = 16'sd55;
-
-                // Safe default.
+                // Pull the calculated filter coefficients textually
+                `include "fir_coefficients.vh"
                 default: coefficient = 16'sd0;
             endcase
         end
