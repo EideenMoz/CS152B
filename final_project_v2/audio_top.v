@@ -1,9 +1,11 @@
 `timescale 1ns / 1ps
+`include "audio_config.vh"
 
 module audio_top(
 input clk,
 input btn,           // start button
-input [1:0] sw,     // 2-bit switch for gain control
+input [1:0] sw,     // 3-bit switch for gain control
+input is_filter_on,
 //output [15:0] led,
 
 // Pmod I2S pins (Mapped to Port JA)
@@ -13,18 +15,16 @@ output sclk,
 output sdin
 );
 
-// 1. Audio Memory (Adjust the size to match your .mem file exactly!)
-localparam MAX_ADDR = 7487; 
-localparam DOWNSAMPLE_FACTOR = 8; 
+// Auto generated audio memory 
+localparam MAX_ADDR          = `CONFIG_MAX_ADDR; 
+localparam DOWNSAMPLE_FACTOR = `CONFIG_DOWNSAMPLE;
 
 reg [15:0] audio_rom [0:MAX_ADDR];
 initial begin
     $readmemh("audio_data.mem", audio_rom);
 end
 
-// 2. Button Edge Detection
-// This ensures pressing the button creates a single, 1-clock-cycle pulse,
-// so holding the button down doesn't glitch the audio.
+// Button Edge Detection
 reg [1:0] btn_sync = 0;
 wire btn_pulse = (btn_sync == 2'b01);
 
@@ -32,7 +32,7 @@ always @(posedge clk) begin
     btn_sync <= {btn_sync[0], btn};
 end
 
-// 3. ROM Read & State Logic
+// ROM Read & State Logic
 reg [16:0] address = 0;
 reg [15:0] current_audio = 0;
 reg [7:0]  hold_counter = 0; 
@@ -67,16 +67,27 @@ always @(posedge clk) begin
     current_audio <= playing ? audio_rom[address] : 16'd0; 
 end
 
-// 3. Digital Gain Module Instantiation
-wire [15:0] gained_audio;
+// Filter and apply gain
+wire [15:0] filtered_audio;
+fir_lowpass_simple lowpass_filter (
+    .audio_clk(clk),                
+    .audio_clk_locked(1'b1),       
+    .sample_valid(next_sample),     
+    .input_sample(current_audio),    
+    .output_sample(filtered_audio)   
+);
 
+// Select between filtered and unfiltered audio based on the switch
+wire [15:0] input_audio = is_filter_on ? filtered_audio : current_audio;
+wire [15:0] gained_audio;
 audio_gain volume_control (
-    .sw(sw),
-    .audio_in(current_audio),
+    .sw(sw),                     
+    .is_filter_on(is_filter_on), //higher gain when filter is on to compensate for being quieter
+    .audio_in(input_audio),
     .audio_out(gained_audio)
 );
 
-// 4. I2S Transmitter Instantiation
+// I2S Transmitter
 i2s_tx i2s_tx (
     .clk(clk),
     .audio_in(gained_audio),
