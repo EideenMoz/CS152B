@@ -5,7 +5,7 @@ import sys
 import numpy as np
 from scipy.signal import firwin
 
-MAX_SAMPLES = 112500
+MAX_SAMPLES = 100_000_000
 
 def write_verilog_headers(config_file, fir_file, max_addr, downsample_factor, num_taps=31):
     """Generates pure Verilog header files containing constants and coefficients."""
