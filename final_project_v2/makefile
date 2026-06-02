@@ -4,6 +4,7 @@
 DOWNSAMPLE ?= 16
 INPUT_WAV  = my_audio.wav
 OUTPUT_MEM = audio_data.mem
+MAX_SAMPLES ?= 1000000
 
 # The pipeline outputs handled by the Makefile
 HEADER_CONFIG = audio_config.vh
@@ -20,7 +21,7 @@ all: generate
 
 generate: $(INPUT_WAV) $(SCRIPT)
 	@echo --- Executing Asset Pipeline ---
-	python $(SCRIPT) $(INPUT_WAV) $(OUTPUT_MEM) -d $(DOWNSAMPLE) --hc $(HEADER_CONFIG) --hf $(HEADER_FIR)
+	python $(SCRIPT) $(INPUT_WAV) $(OUTPUT_MEM) -d $(DOWNSAMPLE) --hc $(HEADER_CONFIG) --hf $(HEADER_FIR) --max_samples $(MAX_SAMPLES)
 	@echo --- Generation Complete! Ready for Vivado compilation. ---
 
 clean:

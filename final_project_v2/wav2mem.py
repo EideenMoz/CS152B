@@ -5,8 +5,6 @@ import sys
 import numpy as np
 from scipy.signal import firwin
 
-MAX_SAMPLES = 100_000_000
-
 def write_verilog_headers(config_file, fir_file, max_addr, downsample_factor, num_taps=31):
     """Generates pure Verilog header files containing constants and coefficients."""
     # 1. Write the global configuration macros
@@ -42,7 +40,7 @@ def write_verilog_headers(config_file, fir_file, max_addr, downsample_factor, nu
     except IOError as e:
         sys.exit(f"Error writing FIR header: {e}")
 
-def wav_to_mem(input_wav, output_mem, downsample_factor, config_file, fir_file):
+def wav_to_mem(input_wav, output_mem, downsample_factor, config_file, fir_file, max_samples):
     try:
         with wave.open(input_wav, 'rb') as wav_file:
             channels = wav_file.getnchannels()
@@ -53,12 +51,12 @@ def wav_to_mem(input_wav, output_mem, downsample_factor, config_file, fir_file):
                 sys.exit("Error: Audio must be 16-bit.")
             
             # Calculate the maximum number of raw frames we can accept
-            max_raw_frames_allowed = MAX_SAMPLES * downsample_factor
+            max_raw_frames_allowed = max_samples * downsample_factor
             
             # Determine how many raw frames we will actually read
             if num_frames > max_raw_frames_allowed:
                 print(f"Warning: Audio file is too large for the Basys 3 BRAM layout.\n"
-                      f"         Truncating to the first {MAX_SAMPLES} downsampled samples.")
+                      f"         Truncating to the first {max_samples} downsampled samples.")
                 frames_to_read = max_raw_frames_allowed
             else:
                 frames_to_read = num_frames
@@ -92,6 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--downsample", type=int, default=16, help="Downsampling factor.")
     parser.add_argument("--hc", default="audio_config.vh", help="Output config header filename")
     parser.add_argument("--hf", default="fir_coefficients.vh", help="Output FIR coefficients header filename")
+    parser.add_argument("--max_samples", type=int, default=5_000_000, help="Maximum number of samples to process after downsampling.")
     
     args = parser.parse_args()
-    wav_to_mem(args.input_wav, args.output_mem, args.downsample, args.hc, args.hf)
+    wav_to_mem(args.input_wav, args.output_mem, args.downsample, args.hc, args.hf,args.max_samples)
