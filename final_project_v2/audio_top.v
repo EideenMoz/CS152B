@@ -54,6 +54,7 @@ always @(posedge clk) begin
     end 
     // Handle playback progression
     else if (playing && next_sample) begin
+        //Slow down the sample rate by DOWNSAMPLE_FACTOR cycles (ensure output matches downsampled rate)
         if (hold_counter == (DOWNSAMPLE_FACTOR - 1)) begin
             hold_counter <= 0;
             

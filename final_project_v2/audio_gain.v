@@ -1,20 +1,16 @@
 `timescale 1ns / 1ps
 
 module audio_gain(
-    input [1:0] sw,                    // Expanded to 3 bits for 16x and 32x options
-    input is_filter_on,                // New input: boosts gain when filtering
+    input [1:0] sw,                   
+    input is_filter_on,                // boosts gain when filtering
     input signed [15:0] audio_in,      // Audio is 2's complement signed data
     output reg signed [15:0] audio_out
 );
 
-    // CRITICAL: Max switch shift is 5 (32x). If filter is on, it adds 1 more shift (64x total).
-    // 16 bits + 6 shifts = 22 bits minimum needed to prevent premature overflow.
-    // We use a 24-bit register to keep math clean and safe.
     reg signed [23:0] amplified;
     reg [2:0] total_shift;
 
     always @(*) begin
-        // 1. Determine base shift amount from switches
         case(sw)
             3'b000:  total_shift = 3'd0; // 1x gain (no shift)
             3'b001:  total_shift = 3'd1; // 2x gain
