@@ -4,7 +4,7 @@
 module audio_top(
 input clk,
 input btn,           // start button
-input [1:0] sw,     // 3-bit switch for gain control
+input [1:0] sw,     // 2-bit switch for gain control
 input is_filter_on,
 //output [15:0] led,
 
@@ -19,7 +19,7 @@ output sdin
 localparam MAX_ADDR          = `CONFIG_MAX_ADDR; 
 localparam DOWNSAMPLE_FACTOR = `CONFIG_DOWNSAMPLE;
 
-reg [15:0] audio_rom [0:MAX_ADDR];
+(* rom_style = "block" *) reg [15:0] audio_rom [0:MAX_ADDR];
 initial begin
     $readmemh("audio_data.mem", audio_rom);
 end
@@ -39,6 +39,11 @@ reg [7:0]  hold_counter = 0;
 reg playing = 0; // NEW: Keeps track of playback state
 
 wire next_sample;
+reg [15:0] raw_rom_data;
+
+always @(posedge clk) begin
+    raw_rom_data <= audio_rom[address];
+end
 
 always @(posedge clk) begin
     // Start playback on button press
@@ -64,7 +69,7 @@ always @(posedge clk) begin
     end
     
     // Output silence (0) when not playing, otherwise output memory data
-    current_audio <= playing ? audio_rom[address] : 16'd0; 
+    current_audio <= playing ? raw_rom_data : 16'd0; 
 end
 
 // Filter and apply gain
